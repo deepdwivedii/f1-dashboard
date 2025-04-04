@@ -3,9 +3,12 @@ from flask import Flask
 from flask_cors import CORS
 import socketio
 
-sio = socketio.Server(cors_allowed_origins='*')
+
 app = Flask(__name__)
 CORS(app)
+sio = socketio.Server(cors_allowed_origins='*', async_mode='eventlet')
+
+app = socketio.WSGIApp(sio, app)
 
 @app.route('/')
 def home():
@@ -21,7 +24,9 @@ def emit_live_data():
         sio.sleep(1)  # Update interval
 
 if __name__ == '__main__':
-    sio.start_background_task(emit_live_data)
-    app = socketio.WSGIApp(sio, app)
     import eventlet
-    eventlet.wsgi.server(eventlet.listen(('', 3002)), app)
+    eventlet.wsgi.server(
+        eventlet.listen(('0.0.0.0', 3002)),  # Explicit port binding
+        app,
+        log_output=False
+    )
