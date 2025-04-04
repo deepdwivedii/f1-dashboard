@@ -1,27 +1,69 @@
-import React from 'react';
 import { useEffect, useState } from 'react';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
+import TrackMap from './TrackMap';
 
-export default function LiveTiming() {
-  const [drivers, setDrivers] = useState<any[]>([]);
+interface LiveCarData {
+  number: string;
+  driverCode: string;
+  x: number;
+  y: number;
+  speed: number;
+  teamColor: string;
+  inPit: boolean;
+}
+
+const LiveTiming = () => {
+  const [cars, setCars] = useState<LiveCarData[]>([]);
 
   useEffect(() => {
-	const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:3001');
-
-    socket.on('f1Update', (data) => {
-      setDrivers(data.drivers);
+    const socket = io(import.meta.env.VITE_API_URL, {
+      transports: ["websocket"],
+      reconnectionAttempts: 5
     });
-    return () => { socket.disconnect(); };
+
+    socket.on("f1_update", (data: LiveCarData[]) => {
+      setCars(data);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   return (
-    <div>
-      <h2>Live Timing</h2>
-      {drivers.map((driver) => (
-        <div key={driver.number} style={{ color: driver.teamColor }}>
-          {driver.position}. {driver.code} ({driver.gap})
-        </div>
-      ))}
+    <div className="live-dashboard p-4 bg-gray-800 text-white min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">F1 Live Tracker</h1>
+      <TrackMap cars={cars} />
+      
+      {/* Timing Table */}
+      <div className="mt-8">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-700">
+              <th className="p-2">Car</th>
+              <th className="p-2">Driver</th>
+              <th className="p-2">Speed</th>
+              <th className="p-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cars.map(car => (
+              <tr key={car.number} className="border-b border-gray-600">
+                <td className="p-2 text-center">{car.number}</td>
+                <td className="p-2" style={{ color: car.teamColor }}>
+                  {car.driverCode}
+                </td>
+                <td className="p-2 text-center">{Math.round(car.speed)} kph</td>
+                <td className="p-2 text-center">
+                  {car.inPit ? 'In Pit' : 'On Track'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
+};
+
+export default LiveTiming;
