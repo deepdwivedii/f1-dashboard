@@ -5,7 +5,7 @@ export default function LiveTiming() {
   const [drivers, setDrivers] = useState<any[]>([]);
 
   useEffect(() => {
-    const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:3001');
+    const socket = io('https://f1-dashboard-3rl5.onrender.com');
     socket.on('f1Update', (data) => {
       setDrivers(data.drivers);
     });
