@@ -1,16 +1,10 @@
-# Environment files
-.env
-.env.local
-.env.development
-.env.production
-
-# Node modules
+# Frontend
 node_modules/
-
-# Build directories
-build/
 dist/
+.env
+.DS_Store
 
-# Python
+# Backend
 __pycache__/
 *.pyc
+.venv/
