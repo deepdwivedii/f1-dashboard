@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: f1-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: python backend/data_worker.py
+    envVars:
+      - key: PORT
+        value: 3002
