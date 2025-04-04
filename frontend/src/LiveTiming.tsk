@@ -1,0 +1,25 @@
+import { useEffect, useState } from 'react';
+import io from 'socket.io-client';
+
+export default function LiveTiming() {
+  const [drivers, setDrivers] = useState<any[]>([]);
+
+  useEffect(() => {
+    const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:3001');
+    socket.on('f1Update', (data) => {
+      setDrivers(data.drivers);
+    });
+    return () => { socket.disconnect(); };
+  }, []);
+
+  return (
+    <div>
+      <h2>Live Timing</h2>
+      {drivers.map((driver) => (
+        <div key={driver.number} style={{ color: driver.teamColor }}>
+          {driver.position}. {driver.code} ({driver.gap})
+        </div>
+      ))}
+    </div>
+  );
+}
